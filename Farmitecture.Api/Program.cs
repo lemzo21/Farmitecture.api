@@ -1,7 +1,14 @@
 using System.Reflection;
+using Farmitecture.Api.Data.Context;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.OpenApi.Models;
 
-var builder = WebApplication.CreateBuilder(args);
+var builder = WebApplication.CreateBuilder(args);{
+    var services = builder.Services;
+    var config = builder.Configuration;
+    services.AddDbContext<ApplicationDbContext>(options =>
+        options.UseNpgsql(config.GetConnectionString("DbConnection")));
+}
 
 // Add services to the container.
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle

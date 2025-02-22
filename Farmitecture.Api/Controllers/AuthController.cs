@@ -9,6 +9,7 @@ namespace Farmitecture.Api.Controllers;
 public class AuthController : ControllerBase
 {
     [HttpPost("login")]
+    [ProducesResponseType(StatusCodes.Status204NoContent)]
     public IActionResult Login([FromBody] LoginRequest request)
     {
         // Implement your login logic here
@@ -16,6 +17,7 @@ public class AuthController : ControllerBase
     }
 
     [HttpPost("signup")]
+    [ProducesResponseType(StatusCodes.Status204NoContent)]
     public IActionResult Signup([FromBody] SignupRequest request)
     {
         // Implement your signup logic here
