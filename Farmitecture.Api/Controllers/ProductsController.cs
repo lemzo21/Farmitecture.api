@@ -17,6 +17,7 @@ namespace Farmitecture.Api.Controllers
             var products = await productRepository.GetAllProducts(filter);
             return Ok(products);
         }
+        
 
         [HttpGet("{id}")]
         [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(ApiResponse<ProductDto>))]
