@@ -79,6 +79,7 @@ namespace Farmitecture.Api.Repositories.Providers
         public async Task AddProduct(CreateProductRequest request)
         {
             var product = mapper.Map<Product>(request);
+            product.CreatedAt = DateTime.UtcNow;
                 await context.Products.AddAsync(product);
                 await context.SaveChangesAsync();
         }

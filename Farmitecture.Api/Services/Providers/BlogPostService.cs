@@ -25,7 +25,8 @@ public class BlogPostService(ApplicationDbContext dbContext, ILogger<BlogPostSer
             Content = blogpost.Content,
             Category = blogpost.Category,
             Status = blogpost.Status,
-            MetaDescription = blogpost.MetaDescription
+            MetaDescription = blogpost.MetaDescription,
+            CreatedAt = DateTime.UtcNow
         };
 
         dbContext.Blogposts.Add(newBlogpost);
