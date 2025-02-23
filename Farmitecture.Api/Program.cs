@@ -1,5 +1,10 @@
 using System.Reflection;
-using Farmitecture.Api.Data.Context;
+using Farmitecture.Api.Data;
+using Farmitecture.Api.Mapper;
+using Farmitecture.Api.Repositories.Interfaces;
+using Farmitecture.Api.Repositories.Providers;
+using Farmitecture.Api.Services.Interfaces;
+using Farmitecture.Api.Services.Providers;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.OpenApi.Models;
 
@@ -8,6 +13,10 @@ var builder = WebApplication.CreateBuilder(args);{
     var config = builder.Configuration;
     services.AddDbContext<ApplicationDbContext>(options =>
         options.UseNpgsql(config.GetConnectionString("DbConnection")));
+    services.AddScoped<IProductRepository, ProductRepository>();
+    builder.Services.AddScoped<ICheckoutService, CheckoutService>();
+    builder.Services.AddScoped<IBlogPostService, BlogPostService>();
+    services.AddAutoMapper(typeof(ApplicationMapper));
 }
 
 // Add services to the container.

@@ -1,10 +1,14 @@
+using Farmitecture.Api.Data.Dtos;
+using Farmitecture.Api.Data.Entities;
+using Farmitecture.Api.Data.Models;
+
 namespace Farmitecture.Api.Repositories.Interfaces;
 
 public interface IProductRepository
 {
-    List<Product> GetAllProducts();
-    Product GetProductById(int id);
-    Task AddProduct(Product product);
-    Task UpdateProduct(Product product);
-    Task DeleteProduct(int id);
+    Task<ApiResponse<PagedResult<IEnumerable<ProductDto>>>> GetAllProducts(BaseFilter filter);
+    Task<ApiResponse<ProductDto>> GetProductById(Guid id);
+    Task AddProduct(CreateProductRequest request);
+    Task UpdateProduct(UpdateProductRequest request);
+    Task DeleteProduct(Guid id);
 }

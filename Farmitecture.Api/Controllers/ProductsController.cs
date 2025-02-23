@@ -1,32 +1,29 @@
+using Farmitecture.Api.Data.Dtos;
+using Farmitecture.Api.Data.Entities;
 using Farmitecture.Api.Data.Models;
-using Farmitecture.Api.Repositories;
+using Farmitecture.Api.Repositories.Interfaces;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Farmitecture.Api.Controllers
 {
     [ApiController]
     [Route("api/[controller]")]
-    public class ProductsController : ControllerBase
+    public class ProductsController(IProductRepository productRepository) : ControllerBase
     {
-        private readonly IProductRepository _productRepository;
-
-        public ProductsController(IProductRepository productRepository)
-        {
-            _productRepository = productRepository;
-        }
-
         [HttpGet]
-        public IActionResult GetAllProducts()
+        [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(ApiResponse<List<ProductDto>>))]
+        public async Task<IActionResult> GetAllProducts([FromQuery] BaseFilter filter)
         {
-            var products = _productRepository.GetAllProducts();
+            var products = await productRepository.GetAllProducts(filter);
             return Ok(products);
         }
 
         [HttpGet("{id}")]
-        public IActionResult GetProductById(int id)
+        [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(ApiResponse<ProductDto>))]
+        public async Task<IActionResult> GetProductById(Guid id)
         {
-            var product = _productRepository.GetProductById(id);
-            if (product == null)
+            var product = await productRepository.GetProductById(id);
+            if (product.Data == null)
             {
                 return NotFound();
             }
@@ -34,40 +31,38 @@ namespace Farmitecture.Api.Controllers
         }
 
         [HttpPost]
-        public IActionResult CreateProduct([FromBody] Product product)
+        [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(ApiResponse<object>))]
+        public async Task<IActionResult> CreateProduct([FromBody] CreateProductRequest product)
         {
-            _productRepository.AddProduct(product);
-            return CreatedAtAction(nameof(GetProductById), new { id = product.Id }, product);
+            await productRepository.AddProduct(product);
+            return Ok(default);
         }
 
         [HttpPut("{id}")]
-        public IActionResult UpdateProduct(int id, [FromBody] Product product)
+        [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(ApiResponse<object>))]
+        public async Task<IActionResult> UpdateProduct(Guid id, [FromBody] UpdateProductRequest product)
         {
-            if (id != product.Id)
-            {
-                return BadRequest();
-            }
-
-            var existingProduct = _productRepository.GetProductById(id);
-            if (existingProduct == null)
+            var existingProduct = await productRepository.GetProductById(id);
+            if (existingProduct.Data == null)
             {
                 return NotFound();
             }
 
-            _productRepository.UpdateProduct(product);
+            await productRepository.UpdateProduct(product);
             return NoContent();
         }
 
         [HttpDelete("{id}")]
-        public IActionResult DeleteProduct(int id)
+        [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(ApiResponse<object>))]
+        public async Task<IActionResult> DeleteProduct(Guid id)
         {
-            var product = _productRepository.GetProductById(id);
-            if (product == null)
+            var product = await productRepository.GetProductById(id);
+            if (product.Data == null)
             {
                 return NotFound();
             }
 
-            _productRepository.DeleteProduct(id);
+            await productRepository.DeleteProduct(id);
             return NoContent();
         }
     }
