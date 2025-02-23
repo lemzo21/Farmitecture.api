@@ -1,2 +1,5 @@
 # Development json
 **/appsettings.Development.json
+# Ignore build artifacts
+/bin/
+/obj/
