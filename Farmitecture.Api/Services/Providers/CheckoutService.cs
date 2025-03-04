@@ -6,13 +6,16 @@ using Microsoft.EntityFrameworkCore;
 using System.Net.Http;
 using System.Text.Json;
 using Farmitecture.Api.Data.Dtos;
+using Flurl.Http;
 
 namespace Farmitecture.Api.Services.Providers;
 
-public class CheckoutService(ApplicationDbContext context) : ICheckoutService
+public class CheckoutService(ApplicationDbContext context,IConfiguration config) : ICheckoutService
 {
+    private readonly string? _baseUrl = config.GetSection("Paystack:BaseUrl").Value;
+    private readonly string? _secretKey = config.GetSection("Paystack:SecretKey").Value;
 
-    public async Task CreateOrderAsync(CheckoutRequest request)
+    public async Task<ApiResponse<string>> CreateOrderAsync(CheckoutRequest request)
     {
         var order = new Order
         {
@@ -22,6 +25,27 @@ public class CheckoutService(ApplicationDbContext context) : ICheckoutService
 
         foreach (var item in request.Items)
         {
+            var product = await context.Products.FindAsync(item.ProductId);
+            if (product == null)
+            {
+                return new ApiResponse<string>
+                {
+                    Code = StatusCodes.Status404NotFound,
+                    IsSuccessful = false,
+                    Message = $"Product with ID {item.ProductId} not found.",
+                };
+            }
+
+            if (item.Quantity > product.Stock)
+            {
+                return new ApiResponse<string>
+                {
+                    Code = StatusCodes.Status400BadRequest,
+                    IsSuccessful = false,
+                    Message = $"Insufficient stock for product with ID {item.ProductId}. Available stock: {product.Stock}, requested quantity: {item.Quantity}."
+                };
+            }
+
             var orderItem = new OrderItem
             {
                 ProductId = item.ProductId,
@@ -33,47 +57,78 @@ public class CheckoutService(ApplicationDbContext context) : ICheckoutService
 
         context.Orders.Add(order);
         await context.SaveChangesAsync();
+        
+        var payStackRequest = new PaystackPaymentRequest
+        {
+            Amount = order.OrderItems.Sum(i => i.Quantity * GetProductPrice(i.ProductId)),
+            Email = request.Email,
+            Currency = "GHC",
+            CallbackUrl = "https://yourapi.com/api/checkout/payment-callback",
+        };
 
-      
-        // var paymentRequest = new PaymentRequest
-        // {
-        //     Amount = order.OrderItems.Sum(i => i.Quantity * GetProductPrice(i.ProductId)),
-        //     OrderId = order.Id,
-        //     CallbackUrl = "https://yourapi.com/api/checkout/payment-callback"
-        // };
+        var response = await InitializePayment(payStackRequest);
+        
+        if (response == null)
+        {
+            return new ApiResponse<string>
+            {
+                Code = StatusCodes.Status500InternalServerError,
+                IsSuccessful = false,
+                Message = "Failed to initialize payment"
+            };
+        }
 
-       // var response = await _httpClient.PostAsJsonAsync("https://api.hubtel.com/v1/merchantaccount/onlinecheckout/invoice/create", paymentRequest);
-        //var response = new HttpResponseMessage();
-        // if (!response.IsSuccessStatusCode)
-        // {
-        //     return new ApiResponse<Order>
-        //     {
-        //         Code = (int)response.StatusCode,
-        //         IsSuccessful = false,
-        //         Message = "Failed to create payment"
-        //     };
-        // }
-        //
-        // return new ApiResponse<Order>
-        // {
-        //     Code = 200,
-        //     Data = order,
-        //     IsSuccessful = true,
-        //     Message = "Order created successfully"
-        // };
+        return new ApiResponse<string>
+        {
+            Code = StatusCodes.Status200OK,
+            IsSuccessful = true,
+            Message = "Order created successfully",
+            Data = response
+        };
     }
-
-    public async Task HandlePaymentCallbackAsync(PaymentCallback callback)
+    
+    private async Task<string?> InitializePayment(PaystackPaymentRequest request)
     {
-        var order = await context.Orders.FindAsync(callback.OrderId);
+        try
+        {
+            var response = await $"{_baseUrl}/transaction/initialize"
+                .WithOAuthBearerToken(_secretKey)
+                .PostJsonAsync(request)
+                .ReceiveJson<PaystackPaymentResponse>();
+
+            if (response.Status)
+            {
+                return response.Data.AuthorizationUrl; 
+            } 
+            return null;
+        }
+        catch(Exception ex)
+        {
+            return null;
+        }
+    }
+    
+
+    public async Task HandlePaymentCallbackAsync(dynamic callback)
+    {
+        var reference = (string)callback.data.reference;
+        var status = (string)callback.data.status;
+        
+        var order = await context.Orders.Include(o=>o.OrderItems).FirstOrDefaultAsync(o=>o.Id==Guid.Parse(reference) );
         if (order == null)
         {
             return;
         }
 
-        if (callback.Status == "success")
+        if (status == "success")
         {
             order.IsPaid = true;
+            // Reduce the stock
+            foreach (var item in order.OrderItems)
+            {
+                var product = await context.Products.FindAsync(item.ProductId);
+                product!.Stock -= item.Quantity;
+            }
         }
         else
         {

@@ -16,6 +16,7 @@ var builder = WebApplication.CreateBuilder(args);{
     services.AddScoped<IProductRepository, ProductRepository>();
     builder.Services.AddScoped<ICheckoutService, CheckoutService>();
     builder.Services.AddScoped<IBlogPostService, BlogPostService>();
+    builder.Services.AddScoped<ICartService, CartService>();
     services.AddAutoMapper(typeof(ApplicationMapper));
 }
 

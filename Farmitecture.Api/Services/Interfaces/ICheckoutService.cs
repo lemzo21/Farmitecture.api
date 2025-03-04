@@ -6,6 +6,6 @@ namespace Farmitecture.Api.Services.Interfaces;
 
 public interface ICheckoutService
 {
-    Task CreateOrderAsync(CheckoutRequest request);
-    Task HandlePaymentCallbackAsync(PaymentCallback callback);
+    Task<ApiResponse<string>> CreateOrderAsync(CheckoutRequest request);
+    Task HandlePaymentCallbackAsync(dynamic callback);
 }

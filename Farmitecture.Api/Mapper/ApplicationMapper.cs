@@ -20,6 +20,15 @@ public class ApplicationMapper : Profile
 
          #endregion
 
+         #region Cart
+
+         CreateMap<Cart, CartDto>()
+             .ForMember(dest => dest.Items, opt => opt.MapFrom(src => src.Items));
+         CreateMap<CartItem, CartItemDto>()
+             .ForMember(dest => dest.Product, opt => opt.MapFrom(src => src.Product));
+         CreateMap<CreateCartItemRequest, CartItem>();
+         #endregion
+
 
     }
 }
