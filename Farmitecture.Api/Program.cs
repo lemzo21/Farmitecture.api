@@ -12,7 +12,8 @@ var builder = WebApplication.CreateBuilder(args);{
     var services = builder.Services;
     var config = builder.Configuration;
     services.AddDbContext<ApplicationDbContext>(options =>
-        options.UseNpgsql(config.GetConnectionString("DbConnection")));
+        options.UseMySql(config.GetConnectionString("DbConnection"), 
+            new MySqlServerVersion(new Version(8, 0, 21))));
     services.AddScoped<IProductRepository, ProductRepository>();
     builder.Services.AddScoped<ICheckoutService, CheckoutService>();
     builder.Services.AddScoped<IBlogPostService, BlogPostService>();
