@@ -131,4 +131,86 @@ public class BlogPostService(ApplicationDbContext dbContext, ILogger<BlogPostSer
                 };
             }
         }
+        
+        public async Task<ApiResponse<string>> DeleteBlogPostAsync(Guid id)
+        {
+            try
+            {
+                var blogpost = await dbContext.Blogposts.FindAsync(id);
+                if (blogpost == null)
+                {
+                    return new ApiResponse<string>
+                    {
+                        Code = StatusCodes.Status404NotFound,
+                        Message = "Blog post not found",
+                        IsSuccessful = false
+                    };
+                }
+
+                dbContext.Blogposts.Remove(blogpost);
+                await dbContext.SaveChangesAsync();
+
+                return new ApiResponse<string>
+                {
+                    Message = "Blog post deleted successfully",
+                    Code = StatusCodes.Status200OK,
+                    IsSuccessful = true
+                };
+            }
+            catch (Exception e)
+            {
+                logger.LogError(e, "Error deleting blog post");
+                return new ApiResponse<string>
+                {
+                    Code = StatusCodes.Status500InternalServerError,
+                    Message = "Error deleting blog post",
+                    IsSuccessful = false
+                };
+            }
+        }
+
+        public async Task<ApiResponse<BlogpostDto>> UpdateBlogPostAsync(Guid id, CreateBlogPostRequest request)
+        {
+            try
+            {
+                var blogpost = await dbContext.Blogposts.FindAsync(id);
+                if (blogpost == null)
+                {
+                    return new ApiResponse<BlogpostDto>
+                    {
+                        Code = StatusCodes.Status404NotFound,
+                        Message = "Blog post not found",
+                        IsSuccessful = false
+                    };
+                }
+
+                blogpost.Topic = request.Topic;
+                blogpost.Content = request.Content;
+                blogpost.Category = request.Category;
+                blogpost.Status = request.Status;
+                blogpost.MetaDescription = request.MetaDescription;
+                blogpost.UpdatedAt = DateTime.UtcNow;
+
+                dbContext.Blogposts.Update(blogpost);
+                await dbContext.SaveChangesAsync();
+
+                return new ApiResponse<BlogpostDto>
+                {
+                    Data = mapper.Map<BlogpostDto>(blogpost),
+                    Message = "Blog post updated successfully",
+                    Code = StatusCodes.Status200OK,
+                    IsSuccessful = true
+                };
+            }
+            catch (Exception e)
+            {
+                logger.LogError(e, "Error updating blog post");
+                return new ApiResponse<BlogpostDto>
+                {
+                    Code = StatusCodes.Status500InternalServerError,
+                    Message = "Error updating blog post",
+                    IsSuccessful = false
+                };
+            }
+        }
     }

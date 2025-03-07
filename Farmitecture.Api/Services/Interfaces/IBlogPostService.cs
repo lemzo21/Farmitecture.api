@@ -12,4 +12,6 @@ public interface IBlogPostService
 
     Task<ApiResponse<PagedResult<IEnumerable<BlogpostDto>>>> GetBlogPostsAsync(BaseFilter filter);
 
+    Task<ApiResponse<string>> DeleteBlogPostAsync(Guid id);
+    Task<ApiResponse<BlogpostDto>> UpdateBlogPostAsync(Guid id, CreateBlogPostRequest request);
 }

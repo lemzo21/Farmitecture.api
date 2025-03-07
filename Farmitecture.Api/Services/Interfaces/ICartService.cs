@@ -7,4 +7,5 @@ public interface ICartService
 {
     Task<CartDto?> GetCartBySessionId(string sessionId);
     Task<ApiResponse<string>> AddToCart(string sessionId, CreateCartItemRequest item);
+    Task<ApiResponse<string>> UpdateCart(string sessionId, UpdateCartRequest request);
 }

@@ -49,4 +49,31 @@ public class BlogPostsController(IBlogPostService blogPostService) : ControllerB
         var result = await blogPostService.GetBlogPostsAsync(filter);
         return Ok(result);
     }
+    
+    /// <summary>
+    /// Deletes a blog post by ID.
+    /// </summary>
+    /// <param name="id">Blog post ID</param>
+    /// <returns></returns>
+    [HttpDelete("{id}")]
+    [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(ApiResponse<string>))]
+    public async Task<IActionResult> DeleteBlogPost(Guid id)
+    {
+        var result = await blogPostService.DeleteBlogPostAsync(id);
+        return Ok(result);
+    }
+
+    /// <summary>
+    /// Updates a blog post by ID.
+    /// </summary>
+    /// <param name="id">Blog post ID</param>
+    /// <param name="request">Update blog post request object</param>
+    /// <returns></returns>
+    [HttpPut("{id}")]
+    [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(ApiResponse<BlogpostDto>))]
+    public async Task<IActionResult> UpdateBlogPost(Guid id, [FromBody] CreateBlogPostRequest request)
+    {
+        var result = await blogPostService.UpdateBlogPostAsync(id, request);
+        return Ok(result);
+    }
 }

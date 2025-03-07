@@ -37,7 +37,16 @@ namespace Farmitecture.Api.Services.Providers
                     Message = "Product not found",
                     IsSuccessful = false,
                     Code = StatusCodes.Status404NotFound
+                };
+            }
 
+            if (product.Stock < item.Quantity)
+            {
+                return new ApiResponse<string>
+                {
+                    Message = "Insufficient stock available",
+                    IsSuccessful = false,
+                    Code = StatusCodes.Status400BadRequest
                 };
             }
 
@@ -62,5 +71,69 @@ namespace Farmitecture.Api.Services.Providers
                 Code = StatusCodes.Status200OK
             };
         }
+        
+        public async Task<ApiResponse<string>> UpdateCart(string sessionId, UpdateCartRequest request)
+        {
+            var cart = await context.Carts.Include(c => c.Items)
+                                          .FirstOrDefaultAsync(c => c.SessionId == sessionId);
+            if (cart == null)
+            {
+                return new ApiResponse<string>
+                {
+                    Message = "Cart not found",
+                    IsSuccessful = false,
+                    Code = StatusCodes.Status404NotFound
+                };
+            }
+
+            foreach (var item in request.Items)
+            {
+                var product = await context.Products.FindAsync(item.ProductId);
+                if (product == null)
+                {
+                    return new ApiResponse<string>
+                    {
+                        Message = $"Product with ID {item.ProductId} not found",
+                        IsSuccessful = false,
+                        Code = StatusCodes.Status404NotFound
+                    };
+                }
+
+                if (product.Stock < item.Quantity)
+                {
+                    return new ApiResponse<string>
+                    {
+                        Message = $"Insufficient stock for product with ID {item.ProductId}",
+                        IsSuccessful = false,
+                        Code = StatusCodes.Status400BadRequest
+                    };
+                }
+
+                var cartItem = cart.Items.FirstOrDefault(i => i.ProductId == item.ProductId);
+                if (cartItem != null)
+                {
+                    cartItem.Quantity = item.Quantity;
+                }
+                else
+                {
+                    cart.Items.Add(new CartItem
+                    {
+                        ProductId = item.ProductId,
+                        Quantity = item.Quantity
+                    });
+                }
+            }
+
+            await context.SaveChangesAsync();
+
+            return new ApiResponse<string>
+            {
+                Data = sessionId,
+                Message = "Cart updated successfully",
+                IsSuccessful = true,
+                Code = StatusCodes.Status200OK
+            };
+        }
+        
     }
 }

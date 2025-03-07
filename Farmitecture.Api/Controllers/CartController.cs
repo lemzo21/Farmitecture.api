@@ -39,5 +39,13 @@ namespace Farmitecture.Api.Controllers
             var res= await _cartService.AddToCart(sessionId, item);
             return Ok(res);
         }
+        
+        [HttpPut("update")]
+        public async Task<IActionResult> UpdateCart([FromQuery] string sessionId, [FromBody] UpdateCartRequest request)
+        {
+            var response = await _cartService.UpdateCart(sessionId, request);
+
+            return Ok(response);
+        }
     }
 }
