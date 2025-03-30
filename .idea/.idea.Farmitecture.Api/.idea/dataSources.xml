@@ -1,28 +1,12 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
   <component name="DataSourceManagerImpl" format="xml" multifile-model="true">
-    <data-source source="LOCAL" name="FarmitectureDb@127.0.0.1" uuid="f15c8917-5fd0-4fd2-8032-dd3e9b3e8f13">
-      <driver-ref>postgresql</driver-ref>
+    <data-source source="LOCAL" name="farm@localhost" uuid="f1cb32e0-0576-457d-95fb-4a63d42be03c">
+      <driver-ref>mariadb</driver-ref>
       <synchronize>true</synchronize>
       <configured-by-url>true</configured-by-url>
-      <jdbc-driver>org.postgresql.Driver</jdbc-driver>
-      <jdbc-url>jdbc:postgresql://127.0.0.1:5433/FarmitectureDb?connectTimeout=30&amp;password=postgres&amp;user=postgres</jdbc-url>
-      <working-dir>$ProjectFileDir$</working-dir>
-    </data-source>
-    <data-source source="LOCAL" name="0@localhost" uuid="1dc2b247-9494-4be1-bf11-b433d5f6178b">
-      <driver-ref>redis</driver-ref>
-      <synchronize>true</synchronize>
-      <configured-by-url>true</configured-by-url>
-      <jdbc-driver>jdbc.RedisDriver</jdbc-driver>
-      <jdbc-url>jdbc:redis://localhost:6379/0</jdbc-url>
-      <working-dir>$ProjectFileDir$</working-dir>
-    </data-source>
-    <data-source source="LOCAL" name="1@localhost" uuid="7fb78c86-e581-4229-b87b-3d577a619204">
-      <driver-ref>redis</driver-ref>
-      <synchronize>true</synchronize>
-      <configured-by-url>true</configured-by-url>
-      <jdbc-driver>jdbc.RedisDriver</jdbc-driver>
-      <jdbc-url>jdbc:redis://localhost:6379/1</jdbc-url>
+      <jdbc-driver>org.mariadb.jdbc.Driver</jdbc-driver>
+      <jdbc-url>jdbc:mariadb://localhost:3306/farm?user=root&amp;password=mariadb</jdbc-url>
       <working-dir>$ProjectFileDir$</working-dir>
     </data-source>
   </component>

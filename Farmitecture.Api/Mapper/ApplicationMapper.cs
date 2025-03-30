@@ -28,6 +28,14 @@ public class ApplicationMapper : Profile
              .ForMember(dest => dest.Product, opt => opt.MapFrom(src => src.Product));
          CreateMap<CreateCartItemRequest, CartItem>();
          #endregion
+         
+         #region Order
+         CreateMap<Order, OrderDto>()
+             .ForMember(dest => dest.OrderItems, opt => opt.MapFrom(src => src.OrderItems));
+         CreateMap<OrderItem, OrderItemDto>();
+         CreateMap<VerifiedData, OrderVerifiedData>();
+
+         #endregion
 
 
     }
